@@ -138,6 +138,11 @@ class _PanoramaState extends State<Panorama>
       } else
         _controller.forward();
     }*/
+    //for retriving the status
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+      } else {}
+    });
     _controller.forward();
     widget.onChangedCallback(longitude, latitude);
   }
