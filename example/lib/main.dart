@@ -31,22 +31,16 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Panorama(
-        animSpeed: 0,
-        interactive: false,
-        sensorControl: SensorControl.Orientation,
-        child: _imageFile != null ? Image.file(_imageFile) : Image.asset('assets/panorama.jpg'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        mini: true,
-        onPressed: () async {
-          _imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
-          setState(() {});
+      body: PageView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return Panorama(
+            sensorControl: SensorControl.None,
+            animSpeed: 1,
+            interactive: false,
+            child: Image.asset('assets/panorama.jpg'),
+          );
         },
-        child: Icon(Icons.panorama),
+        itemCount: 3,
       ),
     );
   }
