@@ -270,19 +270,19 @@ class _PanoramaState extends State<Panorama>
     print("panorama build ${widget.interactive}");
     return widget.interactive
         ? GestureDetector(
-      onScaleStart: _handleScaleStart,
-      onScaleUpdate: _handleScaleUpdate,
-      child: Cube(interactive: false, onSceneCreated: _onSceneCreated),
-    )
+            onScaleStart: _handleScaleStart,
+            onScaleUpdate: _handleScaleUpdate,
+            child: Cube(interactive: false, onSceneCreated: _onSceneCreated),
+          )
         : Cube(interactive: false, onSceneCreated: _onSceneCreated);
   }
 }
 
 Mesh generateSphereMesh(
     {num radius = 1.0,
-      int latSegments = 16,
-      int lonSegments = 16,
-      ui.Image texture}) {
+    int latSegments = 16,
+    int lonSegments = 16,
+    ui.Image texture}) {
   int count = (latSegments + 1) * (lonSegments + 1);
   List<Vector3> vertices = List<Vector3>(count);
   List<Offset> texcoords = List<Offset>(count);
