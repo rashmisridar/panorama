@@ -141,6 +141,7 @@ class _PanoramaState extends State<Panorama>
     //for retriving the status
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
+        _controller.reverse();
       } else {}
     });
     _controller.forward();
