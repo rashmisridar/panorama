@@ -143,9 +143,8 @@ class _PanoramaState extends State<Panorama>
       if (status == AnimationStatus.completed) {
         _controller.reverse();
       } else {}
-      _controller.forward();
     });
-
+    _controller.forward();
     widget.onChangedCallback(longitude, latitude);
   }
 
@@ -238,14 +237,7 @@ class _PanoramaState extends State<Panorama>
         scene.camera.zoom = zoom.clamp(widget.minZoom, widget.maxZoom);
         setCameraTarget(latitude, longitude);
       });
-    if (widget.animSpeed != 0) _controller.forward();
-    /*_controller.addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          _controller.reverse();
-        } else {
-          _controller.forward();
-        }
-      });*/
+    if (widget.animSpeed != 0) _controller.forward(); // _controller.repeat();
   }
 
   @override
