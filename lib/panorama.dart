@@ -93,8 +93,7 @@ class Panorama extends StatefulWidget {
   _PanoramaState createState() => _PanoramaState();
 }
 
-class _PanoramaState extends State<Panorama>
-    with SingleTickerProviderStateMixin {
+class _PanoramaState extends State<Panorama> with SingleTickerProviderStateMixin {
   Scene scene;
   double latitude;
   double longitude;
@@ -116,30 +115,20 @@ class _PanoramaState extends State<Panorama>
   void _handleScaleUpdate(ScaleUpdateDetails details) {
     final offset = details.localFocalPoint - _lastFocalPoint;
     _lastFocalPoint = details.localFocalPoint;
-    latitudeDelta += widget.sensitivity *
-        0.5 *
-        math.pi *
-        offset.dy /
-        scene.camera.viewportHeight;
-    longitudeDelta -= widget.sensitivity *
-        _animateDirection *
-        0.5 *
-        math.pi *
-        offset.dx /
-        scene.camera.viewportHeight;
+    latitudeDelta += widget.sensitivity * 0.5 * math.pi * offset.dy / scene.camera.viewportHeight;
+    longitudeDelta -= widget.sensitivity * _animateDirection * 0.5 * math.pi * offset.dx / scene.camera.viewportHeight;
     if (_lastZoom == null) {
       _lastZoom = scene.camera.zoom;
     }
     zoomDelta += _lastZoom * details.scale - (scene.camera.zoom + zoomDelta);
-    /*  if (!_controller.isAnimating) {
+    if (!_controller.isAnimating) {
       _controller.reset();
       if (widget.animSpeed != 0) {
-        // _controller.repeat();
-        print("widget animationstops ");
+        _controller.repeat();
       } else
         _controller.forward();
-    }*/
-    _controller.forward();
+    }
+
     widget.onChangedCallback(longitude, latitude);
   }
 
@@ -154,13 +143,8 @@ class _PanoramaState extends State<Panorama>
 
     if (widget.child != null) {
       loadImageFromProvider(widget.child.image).then((ui.Image image) {
-        final Mesh mesh = generateSphereMesh(
-            radius: _radius,
-            latSegments: widget.latSegments,
-            lonSegments: widget.lonSegments,
-            texture: image);
-        scene.world
-            .add(Object(name: 'surface', mesh: mesh, backfaceCulling: false));
+        final Mesh mesh = generateSphereMesh(radius: _radius, latSegments: widget.latSegments, lonSegments: widget.lonSegments, texture: image);
+        scene.world.add(Object(name: 'surface', mesh: mesh, backfaceCulling: false));
         scene.updateTexture();
       });
     }
@@ -180,7 +164,6 @@ class _PanoramaState extends State<Panorama>
     latitude = widget.latitude;
     longitude = widget.longitude;
 
-    print("panorama initstate $latitude $longitude");
     if (widget.sensorControl == SensorControl.Orientation) {
       motionSensors.orientation.listen((OrientationEvent event) {
         Quaternion q = Quaternion.euler(-event.roll, event.pitch, event.yaw);
@@ -191,32 +174,23 @@ class _PanoramaState extends State<Panorama>
       });
     }
 
-    _controller = AnimationController(
-        duration: Duration(milliseconds: 60000), vsync: this)
+    _controller = AnimationController(duration: Duration(milliseconds: 60000), vsync: this)
       ..addListener(() {
         if (scene == null) return;
         longitudeDelta += 0.001 * widget.animSpeed;
-        if (latitudeDelta.abs() < 0.001 &&
-            longitudeDelta.abs() < 0.001 &&
-            zoomDelta.abs() < 0.001) {
-          if (widget.animSpeed == 0 && _controller.isAnimating)
-            _controller.stop();
+        if (latitudeDelta.abs() < 0.001 && longitudeDelta.abs() < 0.001 && zoomDelta.abs() < 0.001) {
+          if (widget.animSpeed == 0 && _controller.isAnimating) _controller.stop();
           return;
         }
         // animate vertical rotating
         latitude += latitudeDelta * _dampingFactor * widget.sensitivity;
         latitudeDelta *= 1 - _dampingFactor * widget.sensitivity;
-        latitude = latitude.clamp(radians(math.max(-89, widget.minLatitude)),
-            radians(math.min(89, widget.maxLatitude)));
+        latitude = latitude.clamp(radians(math.max(-89, widget.minLatitude)), radians(math.min(89, widget.maxLatitude)));
         // animate horizontal rotating
-        longitude += _animateDirection *
-            longitudeDelta *
-            _dampingFactor *
-            widget.sensitivity;
+        longitude += _animateDirection * longitudeDelta * _dampingFactor * widget.sensitivity;
         longitudeDelta *= 1 - _dampingFactor * widget.sensitivity;
         if (widget.maxLongitude - widget.minLongitude < 360) {
-          final double lon = longitude.clamp(
-              radians(widget.minLongitude), radians(widget.maxLongitude));
+          final double lon = longitude.clamp(radians(widget.minLongitude), radians(widget.maxLongitude));
           if (longitude != lon) {
             longitude = lon;
             if (widget.animSpeed != 0) {
@@ -233,7 +207,7 @@ class _PanoramaState extends State<Panorama>
         scene.camera.zoom = zoom.clamp(widget.minZoom, widget.maxZoom);
         setCameraTarget(latitude, longitude);
       });
-    if (widget.animSpeed != 0) _controller.forward(); //repeat();
+    if (widget.animSpeed != 0) _controller.repeat();
   }
 
   @override
@@ -247,19 +221,13 @@ class _PanoramaState extends State<Panorama>
     super.didUpdateWidget(oldWidget);
     final Object surface = scene.world.find(RegExp('surface'));
     if (surface == null) return;
-    if (widget.latSegments != oldWidget.latSegments ||
-        widget.lonSegments != oldWidget.lonSegments) {
-      surface.mesh = generateSphereMesh(
-          radius: _radius,
-          latSegments: widget.latSegments,
-          lonSegments: widget.lonSegments,
-          texture: surface.mesh.texture);
+    if (widget.latSegments != oldWidget.latSegments || widget.lonSegments != oldWidget.lonSegments) {
+      surface.mesh = generateSphereMesh(radius: _radius, latSegments: widget.latSegments, lonSegments: widget.lonSegments, texture: surface.mesh.texture);
     }
     if (widget.child?.image != oldWidget.child?.image) {
       loadImageFromProvider(widget.child.image).then((ui.Image image) {
         surface.mesh.texture = image;
-        surface.mesh.textureRect = Rect.fromLTWH(
-            0, 0, image.width.toDouble(), image.height.toDouble());
+        surface.mesh.textureRect = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
         scene.updateTexture();
       });
     }
@@ -267,22 +235,17 @@ class _PanoramaState extends State<Panorama>
 
   @override
   Widget build(BuildContext context) {
-    print("panorama build ${widget.interactive}");
     return widget.interactive
         ? GestureDetector(
-            onScaleStart: _handleScaleStart,
-            onScaleUpdate: _handleScaleUpdate,
-            child: Cube(interactive: false, onSceneCreated: _onSceneCreated),
-          )
+      onScaleStart: _handleScaleStart,
+      onScaleUpdate: _handleScaleUpdate,
+      child: Cube(interactive: false, onSceneCreated: _onSceneCreated),
+    )
         : Cube(interactive: false, onSceneCreated: _onSceneCreated);
   }
 }
 
-Mesh generateSphereMesh(
-    {num radius = 1.0,
-    int latSegments = 16,
-    int lonSegments = 16,
-    ui.Image texture}) {
+Mesh generateSphereMesh({num radius = 1.0, int latSegments = 16, int lonSegments = 16, ui.Image texture}) {
   int count = (latSegments + 1) * (lonSegments + 1);
   List<Vector3> vertices = List<Vector3>(count);
   List<Offset> texcoords = List<Offset>(count);
@@ -295,8 +258,7 @@ Mesh generateSphereMesh(
     final double cv = math.cos(v * math.pi);
     for (int x = 0; x <= lonSegments; ++x) {
       final double u = x / lonSegments;
-      vertices[i] = Vector3(radius * math.cos(u * math.pi * 2.0) * sv,
-          radius * cv, radius * math.sin(u * math.pi * 2.0) * sv);
+      vertices[i] = Vector3(radius * math.cos(u * math.pi * 2.0) * sv, radius * cv, radius * math.sin(u * math.pi * 2.0) * sv);
       texcoords[i] = Offset(u, 1.0 - v);
       i++;
     }
@@ -312,11 +274,7 @@ Mesh generateSphereMesh(
     }
   }
 
-  final Mesh mesh = Mesh(
-      vertices: vertices,
-      texcoords: texcoords,
-      indices: indices,
-      texture: texture);
+  final Mesh mesh = Mesh(vertices: vertices, texcoords: texcoords, indices: indices, texture: texture);
   return mesh;
 }
 
