@@ -131,19 +131,14 @@ class _PanoramaState extends State<Panorama>
       _lastZoom = scene.camera.zoom;
     }
     zoomDelta += _lastZoom * details.scale - (scene.camera.zoom + zoomDelta);
-    /* if (!_controller.isAnimating) {
+    /*  if (!_controller.isAnimating) {
       _controller.reset();
       if (widget.animSpeed != 0) {
-        _controller.repeat();
+        // _controller.repeat();
+        print("widget animationstops ");
       } else
         _controller.forward();
     }*/
-    //for retriving the status
-    _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _controller.reverse();
-      } else {}
-    });
     _controller.forward();
     widget.onChangedCallback(longitude, latitude);
   }
@@ -185,6 +180,7 @@ class _PanoramaState extends State<Panorama>
     latitude = widget.latitude;
     longitude = widget.longitude;
 
+    print("panorama initstate $latitude $longitude");
     if (widget.sensorControl == SensorControl.Orientation) {
       motionSensors.orientation.listen((OrientationEvent event) {
         Quaternion q = Quaternion.euler(-event.roll, event.pitch, event.yaw);
@@ -237,7 +233,7 @@ class _PanoramaState extends State<Panorama>
         scene.camera.zoom = zoom.clamp(widget.minZoom, widget.maxZoom);
         setCameraTarget(latitude, longitude);
       });
-    if (widget.animSpeed != 0) _controller.forward(); // _controller.repeat();
+    if (widget.animSpeed != 0) _controller.forward(); //repeat();
   }
 
   @override
@@ -271,21 +267,22 @@ class _PanoramaState extends State<Panorama>
 
   @override
   Widget build(BuildContext context) {
+    print("panorama build ${widget.interactive}");
     return widget.interactive
         ? GestureDetector(
-            onScaleStart: _handleScaleStart,
-            onScaleUpdate: _handleScaleUpdate,
-            child: Cube(interactive: false, onSceneCreated: _onSceneCreated),
-          )
+      onScaleStart: _handleScaleStart,
+      onScaleUpdate: _handleScaleUpdate,
+      child: Cube(interactive: false, onSceneCreated: _onSceneCreated),
+    )
         : Cube(interactive: false, onSceneCreated: _onSceneCreated);
   }
 }
 
 Mesh generateSphereMesh(
     {num radius = 1.0,
-    int latSegments = 16,
-    int lonSegments = 16,
-    ui.Image texture}) {
+      int latSegments = 16,
+      int lonSegments = 16,
+      ui.Image texture}) {
   int count = (latSegments + 1) * (lonSegments + 1);
   List<Vector3> vertices = List<Vector3>(count);
   List<Offset> texcoords = List<Offset>(count);
